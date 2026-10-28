@@ -5,6 +5,8 @@ import com.example.leave.dto.LeaveRequestResponse;
 import com.example.leave.entity.LeaveRequest;
 import com.example.leave.entity.LeaveStatus;
 import com.example.leave.exception.InvalidDateRangeException;
+import com.example.leave.exception.InvalidRejectionReasonException;
+import com.example.leave.exception.InvalidStatusTransitionException;
 import com.example.leave.exception.OverlappingLeaveException;
 import com.example.leave.exception.ResourceNotFoundException;
 import com.example.leave.repository.LeaveRequestRepository;
@@ -64,6 +66,49 @@ public class LeaveRequestService {
         return leaveRequestRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    // Status transitions:
+    // PENDING -> APPROVED
+    // PENDING -> REJECTED (rejectionReason mandatory)
+    // APPROVED / REJECTED -> no further changes (409 Conflict)
+    @Transactional
+    public LeaveRequestResponse approveLeaveRequest(Long id) {
+        LeaveRequest leaveRequest = findLeaveRequest(id);
+
+        if (leaveRequest.getStatus() != LeaveStatus.PENDING) {
+            throw new InvalidStatusTransitionException(leaveRequest.getStatus());
+        }
+
+        leaveRequest.setStatus(LeaveStatus.APPROVED);
+        leaveRequest.setRejectionReason(null);
+
+        LeaveRequest saved = leaveRequestRepository.save(leaveRequest);
+        return mapToResponse(saved);
+    }
+
+    @Transactional
+    public LeaveRequestResponse rejectLeaveRequest(Long id, String rejectionReason) {
+        LeaveRequest leaveRequest = findLeaveRequest(id);
+
+        if (rejectionReason == null || rejectionReason.isBlank()) {
+            throw new InvalidRejectionReasonException("Rejection reason is required");
+        }
+
+        if (leaveRequest.getStatus() != LeaveStatus.PENDING) {
+            throw new InvalidStatusTransitionException(leaveRequest.getStatus());
+        }
+
+        leaveRequest.setStatus(LeaveStatus.REJECTED);
+        leaveRequest.setRejectionReason(rejectionReason.trim());
+
+        LeaveRequest saved = leaveRequestRepository.save(leaveRequest);
+        return mapToResponse(saved);
+    }
+
+    private LeaveRequest findLeaveRequest(Long id) {
+        return leaveRequestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Leave request not found with id: " + id));
     }
 
     private LeaveRequestResponse mapToResponse(LeaveRequest leaveRequest) {

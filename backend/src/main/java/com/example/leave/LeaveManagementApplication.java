@@ -1,4 +1,4 @@
-package com.omibits.leave_management;
+package com.example.leave;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -7,6 +7,8 @@ import com.example.leave.entity.LeaveRequest;
 import com.example.leave.entity.LeaveStatus;
 import com.example.leave.entity.LeaveType;
 import com.example.leave.exception.InvalidDateRangeException;
+import com.example.leave.exception.InvalidRejectionReasonException;
+import com.example.leave.exception.InvalidStatusTransitionException;
 import com.example.leave.exception.OverlappingLeaveException;
 import com.example.leave.exception.ResourceNotFoundException;
 import com.example.leave.repository.EmployeeRepository;
@@ -169,5 +171,123 @@ class LeaveRequestServiceTest {
         assertNotNull(responses);
         assertEquals(1, responses.size());
         assertEquals("John Doe", responses.get(0).getEmployeeName());
+    }
+
+    @Test
+    void approveLeaveRequest_pending_setsApproved() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.PENDING);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+        when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        LeaveRequestResponse response = leaveRequestService.approveLeaveRequest(10L);
+
+        assertEquals(LeaveStatus.APPROVED, response.getStatus());
+        assertNull(response.getRejectionReason());
+        verify(leaveRequestRepository, times(1)).save(leaveRequest);
+    }
+
+    @Test
+    void approveLeaveRequest_alreadyApproved_throwsInvalidStatusTransitionException() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.APPROVED);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+
+        assertThrows(InvalidStatusTransitionException.class,
+                () -> leaveRequestService.approveLeaveRequest(10L));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void approveLeaveRequest_alreadyRejected_throwsInvalidStatusTransitionException() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.REJECTED);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+
+        assertThrows(InvalidStatusTransitionException.class,
+                () -> leaveRequestService.approveLeaveRequest(10L));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void rejectLeaveRequest_pending_savesRejectedWithReason() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.PENDING);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+        when(leaveRequestRepository.save(any(LeaveRequest.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        LeaveRequestResponse response = leaveRequestService.rejectLeaveRequest(10L, "  Too busy  ");
+
+        assertEquals(LeaveStatus.REJECTED, response.getStatus());
+        assertEquals("Too busy", response.getRejectionReason());
+        assertEquals("Too busy", leaveRequest.getRejectionReason());
+        verify(leaveRequestRepository, times(1)).save(leaveRequest);
+    }
+
+    @Test
+    void rejectLeaveRequest_blankReason_throwsInvalidRejectionReasonException() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.PENDING);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+
+        assertThrows(InvalidRejectionReasonException.class,
+                () -> leaveRequestService.rejectLeaveRequest(10L, "   "));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void rejectLeaveRequest_nullReason_throwsInvalidRejectionReasonException() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.PENDING);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+
+        assertThrows(InvalidRejectionReasonException.class,
+                () -> leaveRequestService.rejectLeaveRequest(10L, null));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void rejectLeaveRequest_alreadyApproved_throwsInvalidStatusTransitionException() {
+        LeaveRequest leaveRequest = leaveRequestWithStatus(LeaveStatus.APPROVED);
+        when(leaveRequestRepository.findById(10L)).thenReturn(Optional.of(leaveRequest));
+
+        assertThrows(InvalidStatusTransitionException.class,
+                () -> leaveRequestService.rejectLeaveRequest(10L, "Too busy"));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void approveLeaveRequest_notFound_throwsResourceNotFoundException() {
+        when(leaveRequestRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> leaveRequestService.approveLeaveRequest(99L));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void rejectLeaveRequest_notFound_throwsResourceNotFoundException() {
+        when(leaveRequestRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> leaveRequestService.rejectLeaveRequest(99L, "Too busy"));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    @Test
+    void rejectLeaveRequest_notFoundWithBlankReason_throwsResourceNotFoundExceptionFirst() {
+        when(leaveRequestRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> leaveRequestService.rejectLeaveRequest(99L, " "));
+        verify(leaveRequestRepository, never()).save(any(LeaveRequest.class));
+    }
+
+    private LeaveRequest leaveRequestWithStatus(LeaveStatus status) {
+        Employee employee = new Employee(1L, "John Doe", "john@example.com", "IT", LocalDateTime.now());
+        LeaveRequest leaveRequest = new LeaveRequest();
+        leaveRequest.setId(10L);
+        leaveRequest.setEmployee(employee);
+        leaveRequest.setLeaveType(LeaveType.ANNUAL);
+        leaveRequest.setStartDate(LocalDate.of(2026, 10, 1));
+        leaveRequest.setEndDate(LocalDate.of(2026, 10, 5));
+        leaveRequest.setReason("Vacation");
+        leaveRequest.setStatus(status);
+        leaveRequest.setCreatedAt(LocalDateTime.now());
+        return leaveRequest;
     }
 }
