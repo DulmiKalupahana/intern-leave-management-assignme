@@ -1,5 +1,6 @@
 package com.example.leave.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,19 +34,52 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                      HttpServletRequest request) {
         String message = "Malformed or unreadable request body";
         if (ex.getMessage() != null && ex.getMessage().contains("LeaveType")) {
             message = "Invalid leave type. Allowed values are: ANNUAL, CASUAL, MEDICAL";
         }
+
+        Map<String, String> fieldErrors = new HashMap<>();
+        if (request.getRequestURI() != null && request.getRequestURI().endsWith("/reject")) {
+            fieldErrors.put("rejectionReason", "Rejection reason is required");
+        }
+
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad Request",
                 message,
-                null
+                fieldErrors.isEmpty() ? null : fieldErrors
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidRejectionReasonException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRejectionReason(InvalidRejectionReasonException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.put("rejectionReason", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                "Validation failed for request",
+                fieldErrors
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidStatusTransition(InvalidStatusTransitionException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                ex.getMessage(),
+                null
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(DuplicateEmailException.class)
