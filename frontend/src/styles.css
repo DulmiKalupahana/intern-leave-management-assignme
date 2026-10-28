@@ -491,6 +491,13 @@ h3 {
   font-weight: 700;
 }
 
+.label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .form-field input,
 .form-field select,
 .form-field textarea {
