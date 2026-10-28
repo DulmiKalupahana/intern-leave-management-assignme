@@ -205,6 +205,7 @@ export default function SubmitLeavePage({ onGoToEmployees }) {
               name="employeeId"
               value={form.employeeId}
               onChange={handleChange}
+              required
               aria-invalid={Boolean(errors.employeeId)}
               aria-describedby={errors.employeeId ? 'leave-employee-error' : undefined}
             >
@@ -229,6 +230,7 @@ export default function SubmitLeavePage({ onGoToEmployees }) {
               name="leaveType"
               value={form.leaveType}
               onChange={handleChange}
+              required
               aria-invalid={Boolean(errors.leaveType)}
               aria-describedby={errors.leaveType ? 'leave-type-error' : undefined}
             >
@@ -254,6 +256,7 @@ export default function SubmitLeavePage({ onGoToEmployees }) {
               type="date"
               value={form.startDate}
               onChange={handleChange}
+              required
               aria-invalid={Boolean(errors.startDate)}
               aria-describedby={errors.startDate ? 'leave-start-error' : undefined}
             />
@@ -272,6 +275,7 @@ export default function SubmitLeavePage({ onGoToEmployees }) {
               type="date"
               value={form.endDate}
               onChange={handleChange}
+              required
               aria-invalid={Boolean(errors.endDate)}
               aria-describedby={errors.endDate ? 'leave-end-error' : undefined}
             />
@@ -297,6 +301,7 @@ export default function SubmitLeavePage({ onGoToEmployees }) {
               maxLength={MAX_REASON_LENGTH}
               rows={4}
               placeholder="Briefly describe why you need leave"
+              required
               aria-invalid={Boolean(errors.reason)}
               aria-describedby={errors.reason ? 'leave-reason-error' : undefined}
             />
