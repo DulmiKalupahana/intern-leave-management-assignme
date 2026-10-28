@@ -197,6 +197,7 @@ export default function EmployeesPage() {
                 onChange={handleChange}
                 placeholder="Jane Doe"
                 autoComplete="name"
+                required
                 aria-invalid={Boolean(errors.name)}
                 aria-describedby={errors.name ? 'employee-name-error' : undefined}
               />
@@ -217,6 +218,7 @@ export default function EmployeesPage() {
                 onChange={handleChange}
                 placeholder="jane.doe@omibits.com"
                 autoComplete="email"
+                required
                 aria-invalid={Boolean(errors.email)}
                 aria-describedby={errors.email ? 'employee-email-error' : undefined}
               />
@@ -237,6 +239,7 @@ export default function EmployeesPage() {
                 onChange={handleChange}
                 placeholder="Engineering"
                 autoComplete="organization"
+                required
                 aria-invalid={Boolean(errors.department)}
                 aria-describedby={
                   errors.department ? 'employee-department-error' : undefined

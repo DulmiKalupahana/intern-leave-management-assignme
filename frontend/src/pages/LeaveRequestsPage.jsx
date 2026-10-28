@@ -317,7 +317,7 @@ export default function LeaveRequestsPage() {
                         type="button"
                         className="btn btn--sm btn--success"
                         onClick={() => handleApprove(leave)}
-                        disabled={busyId === leave.id}
+                        disabled={busyId !== null}
                       >
                         {busyId === leave.id ? 'Approving...' : 'Approve'}
                       </button>
@@ -325,7 +325,7 @@ export default function LeaveRequestsPage() {
                         type="button"
                         className="btn btn--sm btn--danger"
                         onClick={() => openReject(leave)}
-                        disabled={busyId === leave.id}
+                        disabled={busyId !== null}
                       >
                         Reject
                       </button>
@@ -417,6 +417,7 @@ export default function LeaveRequestsPage() {
                 maxLength={MAX_REJECTION_LENGTH}
                 rows={4}
                 placeholder="Explain why this request is being rejected"
+                required
                 aria-invalid={Boolean(rejectError)}
                 aria-describedby={
                   rejectError ? 'rejection-reason-error' : undefined
