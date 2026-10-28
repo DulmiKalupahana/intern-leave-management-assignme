@@ -1,28 +1,55 @@
-export default function App() {
-  return (
-    <div className="app-shell">
-      <header className="app-header">
-        <div className="brand">
-          <span className="brand__mark" aria-hidden="true">
-            O
-          </span>
-          <div>
-            <h1>Omibits Leave Management</h1>
-            <p>Employee leave requests and approvals</p>
-          </div>
-        </div>
-      </header>
+import { useState } from 'react'
+import EmployeesPage from './pages/EmployeesPage'
+import LeaveRequestsPage from './pages/LeaveRequestsPage'
+import SubmitLeavePage from './pages/SubmitLeavePage'
+import { ToastProvider } from './components/Toast'
 
-      <main className="app-main">
-        <section className="card">
-          <div className="card__header">
+const TABS = [
+  { id: 'employees', label: 'Employees' },
+  { id: 'submit', label: 'Submit Leave' },
+  { id: 'requests', label: 'Leave Requests' },
+]
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('employees')
+
+  return (
+    <ToastProvider>
+      <div className="app-shell">
+        <header className="app-header">
+          <div className="brand">
+            <span className="brand__mark" aria-hidden="true">
+              O
+            </span>
             <div>
-              <h2 className="card__title">Employees</h2>
-              <p className="card__subtitle">Frontend scaffold is ready.</p>
+              <h1>Omibits Leave Management</h1>
+              <p>Employee leave requests and approvals</p>
             </div>
           </div>
-        </section>
-      </main>
-    </div>
+
+          <nav className="tabs" aria-label="Main sections">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`tab${activeTab === tab.id ? ' tab--active' : ''}`}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </header>
+
+        <main className="app-main">
+          {activeTab === 'employees' ? <EmployeesPage /> : null}
+          {activeTab === 'submit' ? (
+            <SubmitLeavePage onGoToEmployees={() => setActiveTab('employees')} />
+          ) : null}
+          {activeTab === 'requests' ? <LeaveRequestsPage /> : null}
+        </main>
+      </div>
+    </ToastProvider>
   )
 }
