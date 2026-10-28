@@ -2,7 +2,7 @@ package com.example.leave.exception;
 
 import com.example.leave.entity.LeaveStatus;
 
-public class InvalidStatusTransitionException extends RuntimeException {
+public class InvalidStatusTransitionException extends IllegalStateException {
 
     public InvalidStatusTransitionException(String message) {
         super(message);
