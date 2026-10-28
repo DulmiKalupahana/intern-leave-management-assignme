@@ -2,6 +2,8 @@ package com.example.leave.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "employees")
@@ -21,6 +23,9 @@ public class Employee {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "employee")
+    private List<LeaveRequest> leaveRequests = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -79,4 +84,13 @@ public class Employee {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public List<LeaveRequest> getLeaveRequests() {
+        return leaveRequests;
+    }
+
+    public void setLeaveRequests(List<LeaveRequest> leaveRequests) {
+        this.leaveRequests = leaveRequests;
+    }
 }
+
