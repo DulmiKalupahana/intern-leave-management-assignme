@@ -5,7 +5,7 @@ import com.example.leave.entity.Employee;
 import com.example.leave.entity.LeaveType;
 import com.example.leave.repository.EmployeeRepository;
 import com.example.leave.repository.LeaveRequestRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
