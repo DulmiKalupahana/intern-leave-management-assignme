@@ -1,16 +1,44 @@
-# React + Vite
+# Omibits Leave Management — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the Omibits employee leave management system.
 
-Currently, two official plugins are available:
+## Getting started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install dependencies:
 
-## React Compiler
+   ```bash
+   npm install
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+2. Create your local environment file:
 
-## Expanding the ESLint configuration
+   ```bash
+   cp .env.example .env
+   ```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+   `VITE_API_BASE_URL` defaults to `http://localhost:8080` in `.env.example`.
+
+3. Start the Spring Boot backend on `http://localhost:8080`.
+
+4. Run the dev server:
+
+   ```bash
+   npm run dev
+   ```
+
+## Scripts
+
+- `npm run dev` — start the Vite dev server
+- `npm run build` — create a production build in `dist/`
+- `npm run preview` — preview the production build
+- `npm run lint` — run ESLint
+
+## Pages
+
+- **Employees** — add employees and view the employee list.
+- **Submit Leave** — submit a leave request for an employee.
+- **Leave Requests** — admin view for approving or rejecting pending requests.
+
+## Notes
+
+Authentication is not implemented, so admin actions are not secured.
