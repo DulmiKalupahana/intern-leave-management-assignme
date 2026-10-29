@@ -109,7 +109,8 @@ class LeaveRequestControllerTest {
         mockMvc.perform(post("/api/leaves")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.leaveType").exists());
     }
 
     @Test

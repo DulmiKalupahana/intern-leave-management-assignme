@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '../api/client'
 import { approveLeave, getLeaves, rejectLeave } from '../api/leaves'
+import { MAX_REASON_LENGTH, validateRejectionReason } from '../api/validation'
 import EmptyState from '../components/EmptyState'
 import Modal from '../components/Modal'
 import Spinner from '../components/Spinner'
@@ -19,8 +20,6 @@ const LEAVE_TYPE_LABELS = {
   CASUAL: 'Casual',
   MEDICAL: 'Medical',
 }
-
-const MAX_REJECTION_LENGTH = 500
 
 async function fetchLeaveRequests() {
   const data = await getLeaves()
@@ -201,16 +200,9 @@ export default function LeaveRequestsPage() {
     }
 
     const reason = rejectionReason.trim()
-
-    if (!reason) {
-      setRejectError('Rejection reason is required')
-      return
-    }
-
-    if (reason.length > MAX_REJECTION_LENGTH) {
-      setRejectError(
-        `Rejection reason must not exceed ${MAX_REJECTION_LENGTH} characters`,
-      )
+    const validationError = validateRejectionReason(reason)
+    if (validationError) {
+      setRejectError(validationError)
       return
     }
 
@@ -298,6 +290,7 @@ export default function LeaveRequestsPage() {
             <tr>
               <th scope="col">ID</th>
               <th scope="col">Employee</th>
+              <th scope="col">Department</th>
               <th scope="col">Type</th>
               <th scope="col">Start date</th>
               <th scope="col">End date</th>
@@ -312,6 +305,7 @@ export default function LeaveRequestsPage() {
               <tr key={leave.id}>
                 <td className="cell--nowrap">#{leave.id}</td>
                 <td className="cell--nowrap">{leave.employeeName}</td>
+                <td className="cell--nowrap">{leave.employeeDepartment}</td>
                 <td className="cell--nowrap">{formatLeaveType(leave.leaveType)}</td>
                 <td className="cell--nowrap">{formatDate(leave.startDate)}</td>
                 <td className="cell--nowrap">{formatDate(leave.endDate)}</td>
@@ -416,7 +410,7 @@ export default function LeaveRequestsPage() {
               <div className="label-row">
                 <label htmlFor="rejection-reason">Rejection reason</label>
                 <span className="field-hint">
-                  {rejectionReason.length}/{MAX_REJECTION_LENGTH}
+                  {rejectionReason.length}/{MAX_REASON_LENGTH}
                 </span>
               </div>
               <textarea
@@ -424,7 +418,7 @@ export default function LeaveRequestsPage() {
                 name="rejectionReason"
                 value={rejectionReason}
                 onChange={handleRejectReasonChange}
-                maxLength={MAX_REJECTION_LENGTH}
+                maxLength={MAX_REASON_LENGTH}
                 rows={4}
                 placeholder="Explain why this request is being rejected"
                 required
@@ -450,7 +444,7 @@ export default function LeaveRequestsPage() {
               <button
                 type="submit"
                 className="btn btn--danger"
-                disabled={rejecting || !rejectionReason.trim()}
+                disabled={rejecting}
               >
                 {rejecting ? 'Rejecting...' : 'Confirm rejection'}
               </button>

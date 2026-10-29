@@ -50,10 +50,11 @@ class DataIntegrityViolationHandlerTest {
 
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Jane Doe\",\"email\":\"jane@example.com\",\"department\":\"IT\",\"password\":\"password123\"}"))
+                        .content("{\"name\":\"Jane Doe\",\"email\":\"jane@example.com\",\"department\":\"Engineering\",\"password\":\"password123\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("Conflict"))
-                .andExpect(jsonPath("$.message").value("Email already exists"));
+                .andExpect(jsonPath("$.message").value("Email already exists"))
+                .andExpect(jsonPath("$.fieldErrors.email").value("Email already exists"));
     }
 }

@@ -1,15 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '../api/client'
 import { createEmployee, getEmployees } from '../api/employees'
-import { DEPARTMENTS } from '../api/store'
+import { DEPARTMENTS, validateEmployeeForm } from '../api/validation'
 import EmptyState from '../components/EmptyState'
 import Modal from '../components/Modal'
 import Spinner from '../components/Spinner'
 import { useToast } from '../components/ToastContext'
 
-const EMPTY_FORM = { name: '', email: '', department: '', password: '' }
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 8
+const EMPTY_FORM = { name: '', email: '', department: '' }
 
 function formatCreatedAt(value) {
   if (!value) {
@@ -33,7 +31,7 @@ async function fetchEmployees() {
   return Array.isArray(data) ? data : []
 }
 
-function AddEmployeeForm({ onCreated, onCancel }) {
+function AddEmployeeForm({ employees, onCreated, onCancel }) {
   const { notify } = useToast()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
@@ -53,28 +51,7 @@ function AddEmployeeForm({ onCreated, onCancel }) {
   }
 
   function validate() {
-    const nextErrors = {}
-
-    if (!form.name.trim()) {
-      nextErrors.name = 'Name is required'
-    }
-
-    if (!form.email.trim()) {
-      nextErrors.email = 'Email is required'
-    } else if (!EMAIL_PATTERN.test(form.email.trim())) {
-      nextErrors.email = 'Enter a valid email address'
-    }
-
-    if (!form.department.trim()) {
-      nextErrors.department = 'Department is required'
-    }
-
-    if (!form.password) {
-      nextErrors.password = 'Password is required'
-    } else if (form.password.length < MIN_PASSWORD_LENGTH) {
-      nextErrors.password = `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
-    }
-
+    const nextErrors = validateEmployeeForm(form, employees)
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
@@ -93,7 +70,6 @@ function AddEmployeeForm({ onCreated, onCancel }) {
         name: form.name.trim(),
         email: form.email.trim(),
         department: form.department.trim(),
-        password: form.password,
       })
       onCreated(created)
     } catch (error) {
@@ -101,7 +77,9 @@ function AddEmployeeForm({ onCreated, onCancel }) {
         setErrors(error.fieldErrors)
         notify('Please fix the highlighted fields.', 'error')
       } else if (error instanceof ApiError && error.status === 409) {
-        setErrors({ email: 'Email already exists' })
+        setErrors({
+          email: error.fieldErrors.email || 'An employee with this email already exists',
+        })
         notify(error.message || 'Email already exists', 'error')
       } else {
         notify(
@@ -183,34 +161,10 @@ function AddEmployeeForm({ onCreated, onCancel }) {
             </p>
           ) : null}
         </div>
-
-        <div className="form-field">
-          <div className="label-row">
-            <label htmlFor="employee-password">Temporary password</label>
-            <span className="field-hint">min {MIN_PASSWORD_LENGTH} characters</span>
-          </div>
-          <input
-            id="employee-password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={handleChange}
-            placeholder="Set an initial password"
-            autoComplete="new-password"
-            required
-            aria-invalid={Boolean(errors.password)}
-            aria-describedby={errors.password ? 'employee-password-error' : undefined}
-          />
-          {errors.password ? (
-            <p className="field-error" id="employee-password-error">
-              {errors.password}
-            </p>
-          ) : null}
-        </div>
       </div>
 
       <p className="form-hint">
-        The employee uses this email and password to sign in with Employee Login.
+        The new employee will appear in the employee selection list immediately.
       </p>
 
       <div className="modal__actions">
@@ -386,6 +340,7 @@ export default function EmployeesPage() {
             Creates the employee record and their login account in one step.
           </p>
           <AddEmployeeForm
+            employees={employees}
             onCreated={handleCreated}
             onCancel={() => setFormOpen(false)}
           />

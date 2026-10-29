@@ -43,6 +43,9 @@ public class GlobalExceptionHandler {
         }
 
         Map<String, String> fieldErrors = new HashMap<>();
+        if (message.startsWith("Invalid leave type")) {
+            fieldErrors.put("leaveType", "Choose Annual, Casual or Medical");
+        }
         if (request.getRequestURI() != null && request.getRequestURI().endsWith("/reject")) {
             fieldErrors.put("rejectionReason", "Rejection reason is required");
         }
@@ -85,12 +88,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateEmailException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateEmail(DuplicateEmailException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
+        fieldErrors.put("email", ex.getMessage());
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
                 ex.getMessage(),
-                null
+                fieldErrors
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
@@ -147,12 +152,17 @@ public class GlobalExceptionHandler {
             message = "Email already exists";
         }
 
+        Map<String, String> fieldErrors = null;
+        if ("Email already exists".equals(message)) {
+            fieldErrors = new HashMap<>();
+            fieldErrors.put("email", message);
+        }
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
                 message,
-                null
+                fieldErrors
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
@@ -210,4 +220,3 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-

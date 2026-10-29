@@ -2,6 +2,7 @@ package com.example.leave.service;
 
 import com.example.leave.dto.LeaveRequestCreateRequest;
 import com.example.leave.dto.LeaveRequestResponse;
+import com.example.leave.dto.RejectLeaveRequest;
 import com.example.leave.entity.LeaveRequest;
 import com.example.leave.entity.LeaveStatus;
 import com.example.leave.exception.InvalidDateRangeException;
@@ -104,6 +105,10 @@ public class LeaveRequestService {
 
         if (rejectionReason == null || rejectionReason.isBlank()) {
             throw new InvalidRejectionReasonException("Rejection reason is required");
+        }
+        if (rejectionReason.trim().length() > RejectLeaveRequest.MAX_REASON_LENGTH) {
+            throw new InvalidRejectionReasonException(
+                    "Rejection reason must not exceed " + RejectLeaveRequest.MAX_REASON_LENGTH + " characters");
         }
 
         if (leaveRequest.getStatus() != LeaveStatus.PENDING) {

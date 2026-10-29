@@ -1,7 +1,11 @@
-import { authenticate } from './store'
+import { loginAsAdmin, loginAsEmployee } from './store'
 
-export async function login({ email, password, role }) {
-  return authenticate({ email, password, role })
+export async function loginAsAdminSession() {
+  return loginAsAdmin()
+}
+
+export async function loginAsEmployeeSession(employeeId) {
+  return loginAsEmployee(employeeId)
 }
 
 export async function logout() {

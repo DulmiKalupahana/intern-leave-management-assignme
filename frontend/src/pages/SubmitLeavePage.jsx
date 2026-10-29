@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { ApiError, getErrorMessage } from '../api/client'
 import { createLeave } from '../api/leaves'
+import {
+  LEAVE_TYPE_OPTIONS,
+  MAX_REASON_LENGTH,
+  validateLeaveForm,
+} from '../api/validation'
 import { useToast } from '../components/ToastContext'
 
 const EMPTY_FORM = {
@@ -9,14 +14,6 @@ const EMPTY_FORM = {
   endDate: '',
   reason: '',
 }
-
-const LEAVE_TYPES = [
-  { value: 'ANNUAL', label: 'Annual' },
-  { value: 'CASUAL', label: 'Casual' },
-  { value: 'MEDICAL', label: 'Medical' },
-]
-
-const MAX_REASON_LENGTH = 500
 
 export default function SubmitLeavePage({ onCreated, onCancel }) {
   const { notify } = useToast()
@@ -42,30 +39,7 @@ export default function SubmitLeavePage({ onCreated, onCancel }) {
   }
 
   function validate() {
-    const nextErrors = {}
-
-    if (!form.leaveType) {
-      nextErrors.leaveType = 'Leave type is required'
-    }
-
-    if (!form.startDate) {
-      nextErrors.startDate = 'Start date is required'
-    }
-
-    if (!form.endDate) {
-      nextErrors.endDate = 'End date is required'
-    }
-
-    if (form.startDate && form.endDate && form.endDate < form.startDate) {
-      nextErrors.endDate = 'End date cannot be before start date'
-    }
-
-    if (!form.reason.trim()) {
-      nextErrors.reason = 'Reason is required'
-    } else if (form.reason.length > MAX_REASON_LENGTH) {
-      nextErrors.reason = `Reason must not exceed ${MAX_REASON_LENGTH} characters`
-    }
-
+    const nextErrors = validateLeaveForm(form)
     setErrors(nextErrors)
     return Object.keys(nextErrors).length === 0
   }
@@ -125,7 +99,7 @@ export default function SubmitLeavePage({ onCreated, onCancel }) {
             aria-describedby={errors.leaveType ? 'leave-type-error' : undefined}
           >
             <option value="">Select a leave type</option>
-            {LEAVE_TYPES.map((type) => (
+            {LEAVE_TYPE_OPTIONS.map((type) => (
               <option key={type.value} value={type.value}>
                 {type.label}
               </option>

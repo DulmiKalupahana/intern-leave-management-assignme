@@ -2,6 +2,7 @@ package com.example.leave.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class EmployeeRequest {
@@ -15,6 +16,10 @@ public class EmployeeRequest {
     private String email;
 
     @NotBlank(message = "Department is required")
+    @Pattern(
+            regexp = "^(Administration|Customer Support|Engineering|Finance|Human Resources|Marketing|Operations|Sales)$",
+            message = "Choose a valid department"
+    )
     @Size(max = 100, message = "Department must not exceed 100 characters")
     private String department;
 

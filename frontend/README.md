@@ -1,6 +1,6 @@
 # Omibits Leave Management — Frontend
 
-React + Vite frontend for the frontend-only leave management demo. All data is kept in `localStorage`; no backend or API is required.
+React + Vite frontend for the passwordless leave management demo. All data is kept in `localStorage`; no backend or API is required.
 
 ## Run
 
@@ -11,12 +11,12 @@ npm run dev
 
 Open the URL printed by Vite (normally http://localhost:5173).
 
-## Demo accounts
+## Demo access
 
-| Role | Email | Password |
-|---|---|---|
-| Administrator | `admin@omibits.com` | `admin123` |
-| Employee | `employee@omibits.com` | `employee123` |
+- **Admin Login** opens the Admin Dashboard directly.
+- **Employee Login** shows a dropdown of saved employees; select one to continue without a password.
+
+> Passwordless role selection is for demonstration only and is not secure authentication.
 
 ## Scripts
 
@@ -25,6 +25,4 @@ Open the URL printed by Vite (normally http://localhost:5173).
 - `npm run preview` — preview the production build
 - `npm run lint` — run ESLint
 
-See the [root README](../README.md) for features, limitations and manual test steps.
-
-> This is a demo, not secure production authentication: passwords are stored in plain text in the browser.
+See the [root README](../README.md) for features, limitations and the manual test flow.

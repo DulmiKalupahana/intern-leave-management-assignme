@@ -46,7 +46,7 @@ class EmployeeControllerTest {
 
     @Test
     void createEmployee_valid_returns201() throws Exception {
-        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT", "password123");
+        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "Engineering", "password123");
         
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -54,7 +54,7 @@ class EmployeeControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is("John Doe")))
                 .andExpect(jsonPath("$.email", is("john@example.com")))
-                .andExpect(jsonPath("$.department", is("IT")))
+                .andExpect(jsonPath("$.department", is("Engineering")))
                 .andExpect(jsonPath("$.id").exists());
     }
 
@@ -82,19 +82,31 @@ class EmployeeControllerTest {
     }
 
     @Test
+    void createEmployee_invalidDepartment_returns400WithFieldError() throws Exception {
+        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT", "password123");
+
+        mockMvc.perform(post("/api/employees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.department").exists());
+    }
+
+    @Test
     void createEmployee_duplicateEmail_returns409() throws Exception {
         Employee employee = new Employee();
         employee.setName("Existing");
         employee.setEmail("john@example.com");
-        employee.setDepartment("HR");
+        employee.setDepartment("Human Resources");
         employeeRepository.save(employee);
         
-        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT", "password123");
+        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "Engineering", "password123");
         
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.fieldErrors.email", is("Email already exists")));
     }
 
     @Test

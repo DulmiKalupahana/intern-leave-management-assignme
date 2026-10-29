@@ -1,76 +1,52 @@
-import { useState } from 'react'
-import { login } from '../api/auth'
-import { ApiError, getErrorMessage } from '../api/client'
+import { useEffect, useState } from 'react'
+import { loginAsAdminSession, loginAsEmployeeSession } from '../api/auth'
+import { getErrorMessage } from '../api/client'
+import { getSelectableEmployees } from '../api/employees'
 
 const ROLES = [
   {
     value: 'EMPLOYEE',
     title: 'Employee Login',
-    description: 'Submit leave requests and follow their status.',
+    description: 'Select an employee and submit or follow leave requests.',
     icon: '👤',
   },
   {
     value: 'ADMIN',
     title: 'Admin Login',
-    description: 'Manage employees and approve or reject leave.',
+    description: 'Open the administrator dashboard directly.',
     icon: '🛡️',
   },
 ]
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-
 export default function LoginPage({ onLogin }) {
-  const [role, setRole] = useState(null)
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [errors, setErrors] = useState({})
+  const [mode, setMode] = useState(null)
+  const [employees, setEmployees] = useState([])
+  const [employeeId, setEmployeeId] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const selectedRole = ROLES.find((item) => item.value === role)
+  useEffect(() => {
+    let active = true
 
-  function chooseRole(value) {
-    setRole(value)
-    setError('')
-    setErrors({})
-  }
+    getSelectableEmployees()
+      .then((data) => {
+        if (active) {
+          setEmployees(Array.isArray(data) ? data : [])
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setError('Could not load employees. Try signing in as admin first.')
+        }
+      })
 
-  function handleChange(event) {
-    const { name, value } = event.target
-    setForm((current) => ({ ...current, [name]: value }))
-    setErrors((current) => {
-      if (!current[name]) {
-        return current
-      }
-      const next = { ...current }
-      delete next[name]
-      return next
-    })
-    if (error) {
-      setError('')
+    return () => {
+      active = false
     }
-  }
+  }, [])
 
-  function validate() {
-    const nextErrors = {}
-
-    if (!form.email.trim()) {
-      nextErrors.email = 'Email is required'
-    } else if (!EMAIL_PATTERN.test(form.email.trim())) {
-      nextErrors.email = 'Enter a valid email address'
-    }
-
-    if (!form.password) {
-      nextErrors.password = 'Password is required'
-    }
-
-    setErrors(nextErrors)
-    return Object.keys(nextErrors).length === 0
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault()
-
-    if (submitting || !role || !validate()) {
+  async function handleAdmin() {
+    if (submitting) {
       return
     }
 
@@ -78,25 +54,40 @@ export default function LoginPage({ onLogin }) {
     setError('')
 
     try {
-      const session = await login({
-        email: form.email.trim(),
-        password: form.password,
-        role,
-      })
-      onLogin(session)
+      onLogin(await loginAsAdminSession())
     } catch (loginError) {
-      if (loginError instanceof ApiError && loginError.status === 401) {
-        setError('Invalid email or password.')
-      } else if (loginError instanceof ApiError && loginError.status === 403) {
-        setError(loginError.message)
-      } else if (loginError instanceof ApiError && loginError.status === 400) {
-        setErrors(loginError.fieldErrors)
-        setError('Please fix the highlighted fields.')
-      } else {
-        setError(
-          getErrorMessage(loginError, 'Could not sign in. Please try again.'),
-        )
-      }
+      setError(getErrorMessage(loginError, 'Could not open the admin dashboard.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  function chooseEmployee() {
+    setMode('EMPLOYEE')
+    setError('')
+  }
+
+  async function handleEmployeeSubmit(event) {
+    event.preventDefault()
+
+    if (submitting) {
+      return
+    }
+
+    if (!employeeId) {
+      setError('Select an employee to continue.')
+      return
+    }
+
+    setSubmitting(true)
+    setError('')
+
+    try {
+      onLogin(await loginAsEmployeeSession(employeeId))
+    } catch (loginError) {
+      setError(
+        getErrorMessage(loginError, 'Could not open the employee dashboard.'),
+      )
     } finally {
       setSubmitting(false)
     }
@@ -115,9 +106,9 @@ export default function LoginPage({ onLogin }) {
           </div>
         </div>
 
-        <h2 className="login-title">Sign in</h2>
+        <h2 className="login-title">Continue as</h2>
         <p className="login-subtitle">
-          Choose how you want to continue. Access is scoped to your role.
+          This demonstration uses passwordless role selection.
         </p>
 
         <div className="login-roles" role="group" aria-label="Choose login type">
@@ -126,9 +117,10 @@ export default function LoginPage({ onLogin }) {
               key={item.value}
               type="button"
               id={`${item.value.toLowerCase()}-login`}
-              className={`role-card${role === item.value ? ' role-card--active' : ''}`}
-              aria-pressed={role === item.value}
-              onClick={() => chooseRole(item.value)}
+              className={`role-card${mode === item.value ? ' role-card--active' : ''}`}
+              aria-pressed={mode === item.value}
+              onClick={item.value === 'ADMIN' ? handleAdmin : chooseEmployee}
+              disabled={submitting}
             >
               <span className="role-card__icon" aria-hidden="true">
                 {item.icon}
@@ -139,46 +131,30 @@ export default function LoginPage({ onLogin }) {
           ))}
         </div>
 
-        {selectedRole ? (
-          <form className="form login-form" onSubmit={handleSubmit} noValidate>
+        {mode === 'EMPLOYEE' ? (
+          <form className="form login-form" onSubmit={handleEmployeeSubmit}>
             <div className="form-field">
-              <label htmlFor="login-email">Email</label>
-              <input
-                id="login-email"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@omibits.com"
-                autoComplete="username"
+              <label htmlFor="employee-select">Select employee</label>
+              <select
+                id="employee-select"
+                name="employeeId"
+                value={employeeId}
+                onChange={(event) => {
+                  setEmployeeId(event.target.value)
+                  setError('')
+                }}
                 required
-                aria-invalid={Boolean(errors.email)}
-                aria-describedby={errors.email ? 'login-email-error' : undefined}
-              />
-              {errors.email ? (
-                <p className="field-error" id="login-email-error">
-                  {errors.email}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="form-field">
-              <label htmlFor="login-password">Password</label>
-              <input
-                id="login-password"
-                name="password"
-                type="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Your password"
-                autoComplete="current-password"
-                required
-                aria-invalid={Boolean(errors.password)}
-                aria-describedby={errors.password ? 'login-password-error' : undefined}
-              />
-              {errors.password ? (
-                <p className="field-error" id="login-password-error">
-                  {errors.password}
+              >
+                <option value="">Choose an employee</option>
+                {employees.map((employee) => (
+                  <option key={employee.id} value={employee.id}>
+                    {employee.name} — {employee.department}
+                  </option>
+                ))}
+              </select>
+              {employees.length === 0 ? (
+                <p className="field-hint">
+                  No employees yet. Open Admin Login to add one.
                 </p>
               ) : null}
             </div>
@@ -192,28 +168,24 @@ export default function LoginPage({ onLogin }) {
             <button
               type="submit"
               className="btn btn--primary btn--block"
-              disabled={submitting}
+              disabled={submitting || employees.length === 0}
             >
-              {submitting
-                ? 'Signing in...'
-                : `Sign in as ${role === 'ADMIN' ? 'Admin' : 'Employee'}`}
+              {submitting ? 'Opening...' : 'Continue to Employee Dashboard'}
             </button>
-
-            {role === 'ADMIN' ? (
-              <p className="login-hint">
-                Demo admin: <code>admin@omibits.com</code> / <code>admin123</code>
-              </p>
-            ) : (
-              <p className="login-hint">
-                Demo employee: <code>employee@omibits.com</code> /{' '}
-                <code>employee123</code>. New employees can sign in with the
-                password set by an administrator.
-              </p>
-            )}
           </form>
         ) : (
-          <p className="login-hint">Select a login type to continue.</p>
+          <p className="login-hint">
+            Click <strong>Admin Login</strong> to open the dashboard, or{' '}
+            <strong>Employee Login</strong> to choose an existing employee. No
+            password is required in this demo.
+          </p>
         )}
+
+        {mode !== 'EMPLOYEE' && error ? (
+          <div className="form-alert" role="alert">
+            {error}
+          </div>
+        ) : null}
       </div>
     </div>
   )

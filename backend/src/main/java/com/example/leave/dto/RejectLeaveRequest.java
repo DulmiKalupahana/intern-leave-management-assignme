@@ -4,8 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public class RejectLeaveRequest {
+    public static final int MAX_REASON_LENGTH = 500;
+
     @NotBlank(message = "Rejection reason is required")
-    @Size(max = 500, message = "Rejection reason must not exceed 500 characters")
+    @Size(max = MAX_REASON_LENGTH, message = "Rejection reason must not exceed 500 characters")
     private String rejectionReason;
 
     public RejectLeaveRequest() {

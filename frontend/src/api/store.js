@@ -1,5 +1,12 @@
 import { ApiError } from './client'
 import { readSession } from './session'
+import {
+  validateEmployeeForm,
+  validateLeaveForm,
+  validateRejectionReason,
+} from './validation'
+
+export { DEPARTMENTS } from './validation'
 
 /*
  * Frontend-only demo data store.
@@ -11,20 +18,6 @@ import { readSession } from './session'
 
 const EMPLOYEES_KEY = 'omibits.employees'
 const LEAVES_KEY = 'omibits.leaves'
-
-export const DEPARTMENTS = [
-  'Administration',
-  'Customer Support',
-  'Engineering',
-  'Finance',
-  'Human Resources',
-  'Marketing',
-  'Operations',
-  'Sales',
-]
-
-const LEAVE_TYPES = ['ANNUAL', 'CASUAL', 'MEDICAL']
-const MAX_REASON_LENGTH = 500
 
 export const DEMO_ACCOUNTS = [
   {
@@ -140,7 +133,49 @@ function toLeaveResponse(leave, employees) {
   return {
     ...leave,
     employeeName: employee ? employee.name : 'Unknown employee',
+    employeeDepartment: employee ? employee.department : 'Unknown',
   }
+}
+
+function toSession(account) {
+  return {
+    token: `demo-${account.id}-${Date.now()}`,
+    employeeId: account.id,
+    name: account.name,
+    email: account.email,
+    department: account.department,
+    role: account.role,
+  }
+}
+
+export function loginAsAdmin() {
+  const employees = readEmployees()
+  let admin = employees.find((item) => item.role === 'ADMIN')
+
+  if (!admin) {
+    admin = { ...DEMO_ACCOUNTS[0], id: nextId(employees) }
+    writeEmployees([...employees, admin])
+  }
+
+  return toSession(admin)
+}
+
+export function loginAsEmployee(employeeId) {
+  const employee = readEmployees().find(
+    (item) => item.id === Number(employeeId) && item.role === 'EMPLOYEE',
+  )
+
+  if (!employee) {
+    throw new ApiError(404, 'Select an existing employee to continue.')
+  }
+
+  return toSession(employee)
+}
+
+export function listSelectableEmployees() {
+  return readEmployees()
+    .filter((employee) => employee.role !== 'ADMIN')
+    .map(toPublicEmployee)
 }
 
 export function authenticate({ email, password, role }) {
@@ -187,24 +222,26 @@ export function listEmployees() {
     .map(toPublicEmployee)
 }
 
-export function addEmployee({ name, email, department, password }) {
+export function addEmployee({ name, email, department }) {
   requireAdmin()
 
   const employees = readEmployees()
-  const normalizedEmail = normalizeEmail(email)
+  const errors = validateEmployeeForm({ name, email, department }, employees)
+  if (Object.keys(errors).length > 0) {
+    if (errors.email === 'An employee with this email already exists') {
+      throw new ApiError(409, errors.email, errors)
+    }
 
-  if (employees.some((item) => item.email === normalizedEmail)) {
-    throw new ApiError(409, 'An account with this email already exists.', {
-      email: 'Email already exists',
-    })
+    throw new ApiError(400, 'Please correct the employee details.', errors)
   }
+
+  const normalizedEmail = normalizeEmail(email)
 
   const employee = {
     id: nextId(employees),
     name: String(name).trim(),
     email: normalizedEmail,
     department,
-    password,
     role: 'EMPLOYEE',
     createdAt: new Date().toISOString(),
   }
@@ -235,42 +272,10 @@ export function addLeave({ leaveType, startDate, endDate, reason }) {
     throw new ApiError(403, 'Only employees can submit leave requests.')
   }
 
-  if (!LEAVE_TYPES.includes(leaveType)) {
-    throw new ApiError(400, 'Choose a valid leave type.', {
-      leaveType: 'Choose Annual, Casual or Medical',
-    })
-  }
-
-  if (!startDate) {
-    throw new ApiError(400, 'Start date is required.', {
-      startDate: 'Start date is required',
-    })
-  }
-
-  if (!endDate) {
-    throw new ApiError(400, 'End date is required.', {
-      endDate: 'End date is required',
-    })
-  }
-
-  if (endDate < startDate) {
-    throw new ApiError(400, 'End date cannot be before the start date.', {
-      endDate: 'End date cannot be before start date',
-    })
-  }
-
   const trimmedReason = String(reason ?? '').trim()
-
-  if (!trimmedReason) {
-    throw new ApiError(400, 'Reason is required.', {
-      reason: 'Reason is required',
-    })
-  }
-
-  if (trimmedReason.length > MAX_REASON_LENGTH) {
-    throw new ApiError(400, 'Reason is too long.', {
-      reason: `Reason must not exceed ${MAX_REASON_LENGTH} characters`,
-    })
+  const errors = validateLeaveForm({ leaveType, startDate, endDate, reason })
+  if (Object.keys(errors).length > 0) {
+    throw new ApiError(400, 'Please correct the leave request details.', errors)
   }
 
   const leaves = readLeaves()
@@ -339,17 +344,9 @@ export function approveLeave(id) {
 
 export function rejectLeave(id, rejectionReason) {
   const reason = String(rejectionReason ?? '').trim()
-
-  if (!reason) {
-    throw new ApiError(400, 'A rejection reason is required.', {
-      rejectionReason: 'Rejection reason is required',
-    })
-  }
-
-  if (reason.length > MAX_REASON_LENGTH) {
-    throw new ApiError(400, 'Rejection reason is too long.', {
-      rejectionReason: `Rejection reason must not exceed ${MAX_REASON_LENGTH} characters`,
-    })
+  const error = validateRejectionReason(reason)
+  if (error) {
+    throw new ApiError(400, error, { rejectionReason: error })
   }
 
   return decideLeave(id, 'REJECTED', reason)

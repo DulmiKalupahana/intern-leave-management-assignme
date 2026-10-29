@@ -104,6 +104,16 @@ class AdminApprovalControllerTest {
     }
 
     @Test
+    void rejectLeaveRequest_tooLongReason_returns400WithFieldError() throws Exception {
+        String reason = "x".repeat(501);
+        mockMvc.perform(patch("/api/leaves/{id}/reject", leaveRequest.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"rejectionReason\":\"" + reason + "\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.rejectionReason").exists());
+    }
+
+    @Test
     void rejectLeaveRequest_noBody_returns400() throws Exception {
         mockMvc.perform(patch("/api/leaves/{id}/reject", leaveRequest.getId())
                         .contentType(MediaType.APPLICATION_JSON))
