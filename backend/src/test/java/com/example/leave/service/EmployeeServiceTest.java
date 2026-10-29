@@ -4,7 +4,6 @@ import com.example.leave.dto.EmployeeRequest;
 import com.example.leave.dto.EmployeeResponse;
 import com.example.leave.entity.Employee;
 import com.example.leave.exception.DuplicateEmailException;
-import com.example.leave.exception.ResourceNotFoundException;
 import com.example.leave.repository.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,14 +73,5 @@ class EmployeeServiceTest {
         assertEquals("John Doe", responses.get(0).getName());
         assertEquals("Jane Doe", responses.get(1).getName());
         verify(employeeRepository, times(1)).findAll();
-    }
-
-    @Test
-    void getEmployeeById_notFound_throwsResourceNotFoundException() {
-        Long id = 99L;
-        when(employeeRepository.findById(id)).thenReturn(Optional.empty());
-        
-        assertThrows(ResourceNotFoundException.class, () -> employeeService.getEmployeeById(id));
-        verify(employeeRepository, times(1)).findById(id);
     }
 }

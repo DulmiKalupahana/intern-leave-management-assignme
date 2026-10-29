@@ -1,6 +1,8 @@
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL
 
-export const API_BASE_URL = configuredBaseUrl ? configuredBaseUrl.replace(/\/+$/, '') : ''
+const DEFAULT_API_BASE_URL = 'http://localhost:8080'
+
+export const API_BASE_URL = (configuredBaseUrl || DEFAULT_API_BASE_URL).replace(/\/+$/, '')
 
 const NETWORK_ERROR_MESSAGE =
   'Cannot reach server. Please check that the backend is running and try again.'
@@ -28,13 +30,6 @@ async function readJsonBody(response) {
 }
 
 export async function apiRequest(path, { method = 'GET', body } = {}) {
-  if (!API_BASE_URL) {
-    throw new ApiError(
-      0,
-      'API base URL is not configured. Copy frontend/.env.example to frontend/.env and restart the dev server.',
-    )
-  }
-
   let response
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {

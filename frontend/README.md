@@ -10,13 +10,14 @@ React + Vite frontend for the Omibits employee leave management system.
    npm install
    ```
 
-2. Create your local environment file:
+2. Optionally create a local environment file (the client defaults to
+   `http://localhost:8080` when this is absent):
 
    ```bash
    cp .env.example .env
    ```
 
-   `VITE_API_BASE_URL` defaults to `http://localhost:8080` in `.env.example`.
+   `VITE_API_BASE_URL` is read from `.env` if present.
 
 3. Start the Spring Boot backend on `http://localhost:8080`.
 
