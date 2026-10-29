@@ -1,6 +1,7 @@
 package com.example.leave.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -127,6 +128,30 @@ public class GlobalExceptionHandler {
                 HttpStatus.CONFLICT.value(),
                 "Conflict",
                 ex.getMessage(),
+                null
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Safety net for races that slip past the service-level checks (for example two
+     * simultaneous requests registering the same email). The database unique
+     * constraint is the final authority, and its violation is a client conflict.
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = "The request conflicts with existing data";
+        Throwable cause = ex.getMostSpecificCause();
+        if (cause != null && cause.getMessage() != null
+                && cause.getMessage().toLowerCase().contains("email")) {
+            message = "Email already exists";
+        }
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "Conflict",
+                message,
                 null
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);

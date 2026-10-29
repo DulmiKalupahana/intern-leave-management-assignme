@@ -17,13 +17,15 @@ public class LeaveRequestResponse {
     private LeaveStatus status;
     private String rejectionReason;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public LeaveRequestResponse() {
     }
 
     public LeaveRequestResponse(Long id, Long employeeId, String employeeName, LeaveType leaveType,
                                 LocalDate startDate, LocalDate endDate, String reason,
-                                LeaveStatus status, String rejectionReason, LocalDateTime createdAt) {
+                                LeaveStatus status, String rejectionReason, LocalDateTime createdAt,
+                                LocalDateTime updatedAt) {
         this.id = id;
         this.employeeId = employeeId;
         this.employeeName = employeeName;
@@ -34,6 +36,7 @@ public class LeaveRequestResponse {
         this.status = status;
         this.rejectionReason = rejectionReason;
         this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public Long getId() {
@@ -114,5 +117,13 @@ public class LeaveRequestResponse {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

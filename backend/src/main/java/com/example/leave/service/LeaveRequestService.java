@@ -122,7 +122,8 @@ public class LeaveRequestService {
                 leaveRequest.getReason(),
                 leaveRequest.getStatus(),
                 leaveRequest.getRejectionReason(),
-                leaveRequest.getCreatedAt()
+                leaveRequest.getCreatedAt(),
+                leaveRequest.getUpdatedAt()
         );
     }
 }

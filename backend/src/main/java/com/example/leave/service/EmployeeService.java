@@ -4,7 +4,6 @@ import com.example.leave.dto.EmployeeRequest;
 import com.example.leave.dto.EmployeeResponse;
 import com.example.leave.entity.Employee;
 import com.example.leave.exception.DuplicateEmailException;
-import com.example.leave.exception.ResourceNotFoundException;
 import com.example.leave.repository.EmployeeRepository;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +43,6 @@ public class EmployeeService {
         return employeeRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
-    }
-
-    public Employee getEmployeeById(Long id) {
-        return employeeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + id));
     }
 
     private EmployeeResponse mapToResponse(Employee employee) {
