@@ -1,55 +1,84 @@
-import { useState } from 'react'
-import EmployeesPage from './pages/EmployeesPage'
-import LeaveRequestsPage from './pages/LeaveRequestsPage'
-import SubmitLeavePage from './pages/SubmitLeavePage'
+import { useCallback, useEffect, useState } from 'react'
+import { clearSession, readSession, writeSession } from './api/session'
+import { logout } from './api/auth'
+import { SESSION_EXPIRED_EVENT } from './api/client'
 import { ToastProvider } from './components/Toast'
-
-const TABS = [
-  { id: 'employees', label: 'Employees' },
-  { id: 'submit', label: 'Submit Leave' },
-  { id: 'requests', label: 'Leave Requests' },
-]
+import AdminDashboard from './pages/AdminDashboard'
+import EmployeeDashboard from './pages/EmployeeDashboard'
+import LoginPage from './pages/LoginPage'
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('employees')
+  const [session, setSession] = useState(() => readSession())
+
+  useEffect(() => {
+    function handleExpired() {
+      setSession(null)
+    }
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired)
+  }, [])
+
+  const handleLogin = useCallback((nextSession) => {
+    writeSession(nextSession)
+    setSession(nextSession)
+  }, [])
+
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout()
+    } catch {
+      // The local session is cleared either way.
+    }
+    clearSession()
+    setSession(null)
+  }, [])
 
   return (
     <ToastProvider>
-      <div className="app-shell">
-        <header className="app-header">
-          <div className="brand">
-            <span className="brand__mark" aria-hidden="true">
-              O
-            </span>
-            <div>
-              <h1>Omibits Leave Management</h1>
-              <p>Employee leave requests and approvals</p>
+      {session ? (
+        <div className="app-shell">
+          <header className="app-header">
+            <div className="brand">
+              <span className="brand__mark" aria-hidden="true">
+                O
+              </span>
+              <div>
+                <h1>Omibits Leave Management</h1>
+                <p>
+                  {session.role === 'ADMIN'
+                    ? 'Administrator workspace'
+                    : 'Employee self-service'}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <nav className="tabs" aria-label="Main sections">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`tab${activeTab === tab.id ? ' tab--active' : ''}`}
-                aria-current={activeTab === tab.id ? 'page' : undefined}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                {tab.label}
+            <div className="app-header__account">
+              <div className="user-chip">
+                <span className="user-chip__name">{session.name}</span>
+                <span className="user-chip__meta">
+                  {session.role === 'ADMIN'
+                    ? 'Administrator'
+                    : session.department || 'Employee'}
+                </span>
+              </div>
+              <button type="button" className="btn btn--ghost" onClick={handleLogout}>
+                Sign out
               </button>
-            ))}
-          </nav>
-        </header>
+            </div>
+          </header>
 
-        <main className="app-main">
-          {activeTab === 'employees' ? <EmployeesPage /> : null}
-          {activeTab === 'submit' ? (
-            <SubmitLeavePage onGoToEmployees={() => setActiveTab('employees')} />
-          ) : null}
-          {activeTab === 'requests' ? <LeaveRequestsPage /> : null}
-        </main>
-      </div>
+          <main className="app-main">
+            {session.role === 'ADMIN' ? (
+              <AdminDashboard session={session} />
+            ) : (
+              <EmployeeDashboard session={session} />
+            )}
+          </main>
+        </div>
+      ) : (
+        <LoginPage onLogin={handleLogin} />
+      )}
     </ToastProvider>
   )
 }

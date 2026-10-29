@@ -626,18 +626,7 @@ h3 {
   }
 }
 
-/* Admin notice, toolbar and request actions */
-.notice {
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  border: 1px solid #fcd34d;
-  border-radius: 12px;
-  background: #fffbeb;
-  color: #92400e;
-  font-size: 0.86rem;
-  font-weight: 600;
-}
-
+/* Toolbar and request actions */
 .toolbar {
   display: flex;
   align-items: center;
@@ -787,5 +776,231 @@ h3 {
 @media (max-width: 640px) {
   .modal__actions .btn {
     flex: 1 1 auto;
+  }
+}
+
+/* Login */
+.login-shell {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.login-panel {
+  width: min(720px, 100%);
+  padding: 34px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.login-brand p {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.login-title {
+  font-size: 1.5rem;
+}
+
+.login-subtitle {
+  margin: 6px 0 22px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.login-roles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.role-card:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-muted);
+}
+
+.role-card--active,
+.role-card--active:hover {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.role-card__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.role-card__title {
+  font-weight: 700;
+  font-size: 0.98rem;
+}
+
+.role-card__description {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.login-form {
+  margin-top: 22px;
+}
+
+.login-hint {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.79rem;
+}
+
+.login-hint code {
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-muted);
+  font-size: 0.77rem;
+}
+
+.form-alert {
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  color: #991b1b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.form-hint {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.btn--block {
+  width: 100%;
+}
+
+/* Header account */
+.app-header__account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.3;
+}
+
+.user-chip__name {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.user-chip__meta {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+/* Summary cards */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--warning);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.summary-card--success {
+  border-left-color: var(--success);
+}
+
+.summary-card--danger {
+  border-left-color: var(--danger);
+}
+
+.summary-card__label {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.summary-card__value {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+/* Section tabs and employee leave table */
+.tabs--section {
+  display: inline-flex;
+  margin-bottom: 20px;
+}
+
+.data-table--my-leaves {
+  min-width: 860px;
+}
+
+@media (max-width: 640px) {
+  .login-panel {
+    padding: 22px;
+  }
+
+  .login-roles {
+    grid-template-columns: 1fr;
+  }
+
+  .app-header__account {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-chip {
+    align-items: flex-start;
+  }
+
+  .tabs--section {
+    display: flex;
+    width: 100%;
   }
 }

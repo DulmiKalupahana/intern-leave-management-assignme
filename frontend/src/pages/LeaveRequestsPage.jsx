@@ -266,7 +266,7 @@ export default function LeaveRequestsPage() {
     content = (
       <EmptyState
         title="No leave requests yet"
-        description="Requests submitted from the Submit Leave tab will appear here."
+        description="Requests submitted by employees will appear here for approval."
       />
     )
   } else if (filteredLeaves.length === 0) {
@@ -346,14 +346,10 @@ export default function LeaveRequestsPage() {
 
   return (
     <>
-      <div className="notice" role="note">
-        Authentication not implemented: admin actions are not secured.
-      </div>
-
       <section className="card">
         <div className="card__header">
           <div>
-            <h2 className="card__title">Leave requests</h2>
+            <h2 className="card__title">All leave requests</h2>
             <p className="card__subtitle">
               {leaves.length} {leaves.length === 1 ? 'request' : 'requests'} ·{' '}
               {pendingCount} pending
@@ -419,9 +415,7 @@ export default function LeaveRequestsPage() {
                 placeholder="Explain why this request is being rejected"
                 required
                 aria-invalid={Boolean(rejectError)}
-                aria-describedby={
-                  rejectError ? 'rejection-reason-error' : undefined
-                }
+                aria-describedby={rejectError ? 'rejection-reason-error' : undefined}
               />
               {rejectError ? (
                 <p className="field-error" id="rejection-reason-error">
