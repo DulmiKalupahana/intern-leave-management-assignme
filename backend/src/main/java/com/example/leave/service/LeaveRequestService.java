@@ -31,6 +31,10 @@ public class LeaveRequestService {
 
     @Transactional
     public LeaveRequestResponse createLeaveRequest(LeaveRequestCreateRequest request) {
+        if (request.getEmployeeId() == null) {
+            throw new IllegalArgumentException("Employee id is required");
+        }
+
         Employee employee = employeeRepository.findById(request.getEmployeeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + request.getEmployeeId()));
 
@@ -64,6 +68,13 @@ public class LeaveRequestService {
     @Transactional(readOnly = true)
     public List<LeaveRequestResponse> getAllLeaveRequests() {
         return leaveRequestRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<LeaveRequestResponse> getLeaveRequestsForEmployee(Long employeeId) {
+        return leaveRequestRepository.findByEmployeeIdOrderByCreatedAtDesc(employeeId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }

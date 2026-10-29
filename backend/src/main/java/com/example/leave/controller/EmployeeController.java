@@ -2,6 +2,7 @@ package com.example.leave.controller;
 
 import com.example.leave.dto.EmployeeRequest;
 import com.example.leave.dto.EmployeeResponse;
+import com.example.leave.security.AdminOnly;
 import com.example.leave.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@AdminOnly
 @RestController
 @RequestMapping("/api/employees")
 public class EmployeeController {

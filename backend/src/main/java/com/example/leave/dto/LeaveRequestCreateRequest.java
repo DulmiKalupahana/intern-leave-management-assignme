@@ -8,7 +8,11 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 public class LeaveRequestCreateRequest {
-    @NotNull(message = "Employee id is required")
+    /**
+     * Optional in the payload: employee sessions always submit for themselves and
+     * the controller fills this in. Only administrators may target another employee,
+     * in which case they must supply it explicitly.
+     */
     private Long employeeId;
 
     @NotNull(message = "Leave type is required")

@@ -12,6 +12,8 @@ import java.util.List;
 public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long> {
     List<LeaveRequest> findAllByOrderByCreatedAtDesc();
 
+    List<LeaveRequest> findByEmployeeIdOrderByCreatedAtDesc(Long employeeId);
+
     @Query("SELECT CASE WHEN COUNT(l) > 0 THEN true ELSE false END FROM LeaveRequest l " +
             "WHERE l.employee.id = :employeeId " +
             "AND l.status IN :statuses " +
