@@ -50,7 +50,7 @@ class DataIntegrityViolationHandlerTest {
 
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"name\":\"Jane Doe\",\"email\":\"jane@example.com\",\"department\":\"IT\"}"))
+                        .content("{\"name\":\"Jane Doe\",\"email\":\"jane@example.com\",\"department\":\"IT\",\"password\":\"password123\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.status").value(409))
                 .andExpect(jsonPath("$.error").value("Conflict"))

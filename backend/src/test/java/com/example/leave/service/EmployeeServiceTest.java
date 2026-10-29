@@ -4,6 +4,7 @@ import com.example.leave.dto.EmployeeRequest;
 import com.example.leave.dto.EmployeeResponse;
 import com.example.leave.entity.Employee;
 import com.example.leave.exception.DuplicateEmailException;
+import com.example.leave.repository.AccountRepository;
 import com.example.leave.repository.EmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,19 +26,23 @@ class EmployeeServiceTest {
     @Mock
     private EmployeeRepository employeeRepository;
 
+    @Mock
+    private AccountRepository accountRepository;
+
     @InjectMocks
     private EmployeeService employeeService;
 
     @Test
     void createEmployee_validEmployee_succeeds() {
-        EmployeeRequest request = new EmployeeRequest("John Doe", "JOHN@EXAMPLE.COM", "IT");
+        EmployeeRequest request = new EmployeeRequest("John Doe", "JOHN@EXAMPLE.COM", "IT", "password123");
         Employee savedEmployee = new Employee(1L, "John Doe", "john@example.com", "IT", LocalDateTime.now());
-        
+
         when(employeeRepository.existsByEmail("john@example.com")).thenReturn(false);
+        when(accountRepository.existsByEmail("john@example.com")).thenReturn(false);
         when(employeeRepository.save(any(Employee.class))).thenReturn(savedEmployee);
-        
+
         EmployeeResponse response = employeeService.createEmployee(request);
-        
+
         assertNotNull(response);
         assertEquals(1L, response.getId());
         assertEquals("John Doe", response.getName());
@@ -45,17 +50,19 @@ class EmployeeServiceTest {
         assertEquals("IT", response.getDepartment());
         verify(employeeRepository, times(1)).existsByEmail("john@example.com");
         verify(employeeRepository, times(1)).save(any(Employee.class));
+        verify(accountRepository, times(1)).save(any());
     }
 
     @Test
     void createEmployee_duplicateEmail_throwsDuplicateEmailException() {
-        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT");
-        
+        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT", "password123");
+
         when(employeeRepository.existsByEmail("john@example.com")).thenReturn(true);
-        
+
         assertThrows(DuplicateEmailException.class, () -> employeeService.createEmployee(request));
         verify(employeeRepository, times(1)).existsByEmail("john@example.com");
         verify(employeeRepository, never()).save(any(Employee.class));
+        verify(accountRepository, never()).save(any());
     }
 
     @Test
@@ -63,11 +70,12 @@ class EmployeeServiceTest {
         Employee emp1 = new Employee(1L, "John Doe", "john@example.com", "IT", LocalDateTime.now());
         Employee emp2 = new Employee(2L, "Jane Doe", "jane@example.com", "HR", LocalDateTime.now());
         List<Employee> employees = Arrays.asList(emp1, emp2);
-        
+
         when(employeeRepository.findAll()).thenReturn(employees);
-        
+        when(accountRepository.findEmployeeIdsByRole(any())).thenReturn(List.of());
+
         List<EmployeeResponse> responses = employeeService.getAllEmployees();
-        
+
         assertNotNull(responses);
         assertEquals(2, responses.size());
         assertEquals("John Doe", responses.get(0).getName());

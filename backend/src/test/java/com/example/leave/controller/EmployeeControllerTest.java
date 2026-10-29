@@ -46,7 +46,7 @@ class EmployeeControllerTest {
 
     @Test
     void createEmployee_valid_returns201() throws Exception {
-        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT");
+        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT", "password123");
         
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -60,7 +60,7 @@ class EmployeeControllerTest {
 
     @Test
     void createEmployee_invalidEmail_returns400WithFieldErrors() throws Exception {
-        EmployeeRequest request = new EmployeeRequest("John Doe", "invalid-email", "IT");
+        EmployeeRequest request = new EmployeeRequest("John Doe", "invalid-email", "IT", "password123");
         
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -72,7 +72,7 @@ class EmployeeControllerTest {
 
     @Test
     void createEmployee_blankName_returns400() throws Exception {
-        EmployeeRequest request = new EmployeeRequest("", "john@example.com", "IT");
+        EmployeeRequest request = new EmployeeRequest("", "john@example.com", "IT", "password123");
         
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -89,7 +89,7 @@ class EmployeeControllerTest {
         employee.setDepartment("HR");
         employeeRepository.save(employee);
         
-        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT");
+        EmployeeRequest request = new EmployeeRequest("John Doe", "john@example.com", "IT", "password123");
         
         mockMvc.perform(post("/api/employees")
                         .contentType(MediaType.APPLICATION_JSON)
