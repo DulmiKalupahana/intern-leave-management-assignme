@@ -18,6 +18,14 @@ export const LEAVE_TYPES = LEAVE_TYPE_OPTIONS.map((type) => type.value)
 export const MAX_REASON_LENGTH = 500
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+export function getTodayDate() {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 function isValidDate(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false
@@ -58,7 +66,7 @@ export function validateEmployeeForm(employee, employees = []) {
   return errors
 }
 
-export function validateLeaveForm(leave) {
+export function validateLeaveForm(leave, today = getTodayDate()) {
   const errors = {}
 
   if (!leave.leaveType) {
@@ -74,12 +82,16 @@ export function validateLeaveForm(leave) {
     errors.startDate = 'Start date is required'
   } else if (!isValidDate(leave.startDate)) {
     errors.startDate = 'Enter a valid start date'
+  } else if (leave.startDate < today) {
+    errors.startDate = 'Start date cannot be in the past'
   }
 
   if (!hasEndDate) {
     errors.endDate = 'End date is required'
   } else if (!isValidDate(leave.endDate)) {
     errors.endDate = 'Enter a valid end date'
+  } else if (leave.endDate < today) {
+    errors.endDate = 'End date cannot be in the past'
   }
 
   if (
@@ -89,7 +101,10 @@ export function validateLeaveForm(leave) {
     isValidDate(leave.endDate) &&
     leave.endDate < leave.startDate
   ) {
-    errors.endDate = 'End date cannot be before start date'
+    errors.endDate =
+      leave.endDate < today
+        ? 'End date cannot be in the past'
+        : 'End date cannot be before start date'
   }
 
   const reason = String(leave.reason ?? '').trim()

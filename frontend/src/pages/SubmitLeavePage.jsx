@@ -4,6 +4,7 @@ import { createLeave } from '../api/leaves'
 import {
   LEAVE_TYPE_OPTIONS,
   MAX_REASON_LENGTH,
+  getTodayDate,
   validateLeaveForm,
 } from '../api/validation'
 import { useToast } from '../components/ToastContext'
@@ -17,6 +18,7 @@ const EMPTY_FORM = {
 
 export default function SubmitLeavePage({ onCreated, onCancel }) {
   const { notify } = useToast()
+  const today = getTodayDate()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [submitting, setSubmitting] = useState(false)
@@ -118,6 +120,7 @@ export default function SubmitLeavePage({ onCreated, onCancel }) {
             id="leave-start-date"
             name="startDate"
             type="date"
+            min={today}
             value={form.startDate}
             onChange={handleChange}
             required
@@ -137,6 +140,7 @@ export default function SubmitLeavePage({ onCreated, onCancel }) {
             id="leave-end-date"
             name="endDate"
             type="date"
+            min={form.startDate > today ? form.startDate : today}
             value={form.endDate}
             onChange={handleChange}
             required

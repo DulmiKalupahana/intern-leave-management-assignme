@@ -63,8 +63,9 @@ class LeaveRequestControllerTest {
         LeaveRequestCreateRequest request = new LeaveRequestCreateRequest();
         request.setEmployeeId(employee.getId());
         request.setLeaveType(LeaveType.ANNUAL);
-        request.setStartDate(LocalDate.of(2026, 10, 1));
-        request.setEndDate(LocalDate.of(2026, 10, 5));
+        LocalDate today = LocalDate.now();
+        request.setStartDate(today);
+        request.setEndDate(today);
         request.setReason("Vacation");
 
         mockMvc.perform(post("/api/leaves")
@@ -80,8 +81,8 @@ class LeaveRequestControllerTest {
         LeaveRequestCreateRequest request = new LeaveRequestCreateRequest();
         request.setEmployeeId(employee.getId());
         request.setLeaveType(LeaveType.ANNUAL);
-        request.setStartDate(LocalDate.of(2026, 10, 5));
-        request.setEndDate(LocalDate.of(2026, 10, 1));
+        request.setStartDate(LocalDate.now().plusDays(5));
+        request.setEndDate(LocalDate.now().plusDays(1));
         request.setReason("Vacation");
 
         mockMvc.perform(post("/api/leaves")
@@ -89,6 +90,23 @@ class LeaveRequestControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.fieldErrors.endDate").exists());
+    }
+
+    @Test
+    void createLeaveRequest_pastDates_returns400WithFieldErrors() throws Exception {
+        LeaveRequestCreateRequest request = new LeaveRequestCreateRequest();
+        request.setEmployeeId(employee.getId());
+        request.setLeaveType(LeaveType.ANNUAL);
+        request.setStartDate(LocalDate.now().minusDays(2));
+        request.setEndDate(LocalDate.now().minusDays(1));
+        request.setReason("Vacation");
+
+        mockMvc.perform(post("/api/leaves")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.fieldErrors.startDate").value("Start date cannot be in the past"))
+                .andExpect(jsonPath("$.fieldErrors.endDate").value("End date cannot be in the past"));
     }
 
     @Test
@@ -104,7 +122,10 @@ class LeaveRequestControllerTest {
 
     @Test
     void createLeaveRequest_invalidLeaveType_returns400() throws Exception {
-        String json = "{\"employeeId\":" + employee.getId() + ",\"leaveType\":\"INVALID\",\"startDate\":\"2026-10-01\",\"endDate\":\"2026-10-05\",\"reason\":\"Vacation\"}";
+        String startDate = LocalDate.now().plusDays(1).toString();
+        String endDate = LocalDate.now().plusDays(5).toString();
+        String json = "{\"employeeId\":" + employee.getId() + ",\"leaveType\":\"INVALID\",\"startDate\":\""
+                + startDate + "\",\"endDate\":\"" + endDate + "\",\"reason\":\"Vacation\"}";
 
         mockMvc.perform(post("/api/leaves")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -118,8 +139,8 @@ class LeaveRequestControllerTest {
         LeaveRequestCreateRequest request = new LeaveRequestCreateRequest();
         request.setEmployeeId(9999L);
         request.setLeaveType(LeaveType.ANNUAL);
-        request.setStartDate(LocalDate.of(2026, 10, 1));
-        request.setEndDate(LocalDate.of(2026, 10, 5));
+        request.setStartDate(LocalDate.now().plusDays(1));
+        request.setEndDate(LocalDate.now().plusDays(5));
         request.setReason("Vacation");
 
         mockMvc.perform(post("/api/leaves")
@@ -133,8 +154,8 @@ class LeaveRequestControllerTest {
         LeaveRequestCreateRequest request1 = new LeaveRequestCreateRequest();
         request1.setEmployeeId(employee.getId());
         request1.setLeaveType(LeaveType.ANNUAL);
-        request1.setStartDate(LocalDate.of(2026, 10, 1));
-        request1.setEndDate(LocalDate.of(2026, 10, 5));
+        request1.setStartDate(LocalDate.now().plusDays(1));
+        request1.setEndDate(LocalDate.now().plusDays(5));
         request1.setReason("Vacation");
 
         mockMvc.perform(post("/api/leaves")
@@ -145,8 +166,8 @@ class LeaveRequestControllerTest {
         LeaveRequestCreateRequest request2 = new LeaveRequestCreateRequest();
         request2.setEmployeeId(employee.getId());
         request2.setLeaveType(LeaveType.CASUAL);
-        request2.setStartDate(LocalDate.of(2026, 10, 3));
-        request2.setEndDate(LocalDate.of(2026, 10, 7));
+        request2.setStartDate(LocalDate.now().plusDays(3));
+        request2.setEndDate(LocalDate.now().plusDays(7));
         request2.setReason("Personal");
 
         mockMvc.perform(post("/api/leaves")
@@ -160,8 +181,8 @@ class LeaveRequestControllerTest {
         LeaveRequestCreateRequest request = new LeaveRequestCreateRequest();
         request.setEmployeeId(employee.getId());
         request.setLeaveType(LeaveType.ANNUAL);
-        request.setStartDate(LocalDate.of(2026, 10, 1));
-        request.setEndDate(LocalDate.of(2026, 10, 5));
+        request.setStartDate(LocalDate.now().plusDays(1));
+        request.setEndDate(LocalDate.now().plusDays(5));
         request.setReason("Vacation");
 
         mockMvc.perform(post("/api/leaves")

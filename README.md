@@ -49,7 +49,7 @@ npm run preview
 - Employee access by selecting an existing saved employee.
 - Add Employee form with name, email, department dropdown and immediate selection-list update.
 - Employee leave request form with type, start date, end date and reason.
-- Validation for required fields, invalid dates, reason length and overlapping pending/approved leave.
+- Validation for required fields, dates in the past or before the start date, reason length and overlapping pending/approved leave.
 - Admin list of every request, including employee name and department.
 - Approve/reject pending requests with a required rejection reason.
 - Updated statuses visible to employees.
