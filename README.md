@@ -109,6 +109,8 @@ cd backend
 ./mvnw test          # Windows: mvnw.cmd test
 ```
 
+Last verified locally: `npm run lint` and `npm run build` pass; the retained backend suite passes with **54 tests, 0 failures**.
+
 ## Limitations
 
 - Frontend-only demo; passwords are stored in plain text in `localStorage`.
