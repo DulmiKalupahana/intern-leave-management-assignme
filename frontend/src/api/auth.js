@@ -1,16 +1,9 @@
-import { apiRequest } from './client'
+import { authenticate } from './store'
 
-export function login({ email, password, role }) {
-  return apiRequest('/api/auth/login', {
-    method: 'POST',
-    body: { email, password, role },
-  })
+export async function login({ email, password, role }) {
+  return authenticate({ email, password, role })
 }
 
-export function getCurrentUser() {
-  return apiRequest('/api/auth/me')
-}
-
-export function logout() {
-  return apiRequest('/api/auth/logout', { method: 'POST' })
+export async function logout() {
+  return undefined
 }

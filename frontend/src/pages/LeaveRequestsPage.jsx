@@ -114,6 +114,20 @@ export default function LeaveRequestsPage() {
     }
   }, [])
 
+  useEffect(() => {
+    function refresh() {
+      loadLeaves()
+    }
+
+    window.addEventListener('storage', refresh)
+    window.addEventListener('focus', refresh)
+
+    return () => {
+      window.removeEventListener('storage', refresh)
+      window.removeEventListener('focus', refresh)
+    }
+  }, [loadLeaves])
+
   const resetReject = useCallback(() => {
     setRejectTarget(null)
     setRejectionReason('')

@@ -201,12 +201,13 @@ export default function LoginPage({ onLogin }) {
 
             {role === 'ADMIN' ? (
               <p className="login-hint">
-                First run? Use <code>admin@omibits.com</code> / <code>admin123</code>. Set{' '}
-                <code>ADMIN_PASSWORD</code> before deploying.
+                Demo admin: <code>admin@omibits.com</code> / <code>admin123</code>
               </p>
             ) : (
               <p className="login-hint">
-                Accounts are created by an administrator in Employee Management.
+                Demo employee: <code>employee@omibits.com</code> /{' '}
+                <code>employee123</code>. New employees can sign in with the
+                password set by an administrator.
               </p>
             )}
           </form>

@@ -1,31 +1,22 @@
 # Omibits Leave Management — Frontend
 
-React + Vite frontend for the Omibits employee leave management system.
+React + Vite frontend for the frontend-only leave management demo. All data is kept in `localStorage`; no backend or API is required.
 
-## Getting started
+## Run
 
-1. Install dependencies:
+```bash
+npm install
+npm run dev
+```
 
-   ```bash
-   npm install
-   ```
+Open the URL printed by Vite (normally http://localhost:5173).
 
-2. Optionally create a local environment file (the client defaults to
-   `http://localhost:8080` when this is absent):
+## Demo accounts
 
-   ```bash
-   cp .env.example .env
-   ```
-
-   `VITE_API_BASE_URL` is read from `.env` if present.
-
-3. Start the Spring Boot backend on `http://localhost:8080`.
-
-4. Run the dev server:
-
-   ```bash
-   npm run dev
-   ```
+| Role | Email | Password |
+|---|---|---|
+| Administrator | `admin@omibits.com` | `admin123` |
+| Employee | `employee@omibits.com` | `employee123` |
 
 ## Scripts
 
@@ -34,12 +25,6 @@ React + Vite frontend for the Omibits employee leave management system.
 - `npm run preview` — preview the production build
 - `npm run lint` — run ESLint
 
-## Pages
+See the [root README](../README.md) for features, limitations and manual test steps.
 
-- **Employees** — add employees and view the employee list.
-- **Submit Leave** — submit a leave request for an employee.
-- **Leave Requests** — admin view for approving or rejecting pending requests.
-
-## Notes
-
-Authentication is not implemented, so admin actions are not secured.
+> This is a demo, not secure production authentication: passwords are stored in plain text in the browser.

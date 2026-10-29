@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { clearSession, readSession, writeSession } from './api/session'
-import { logout } from './api/auth'
-import { SESSION_EXPIRED_EVENT } from './api/client'
 import { ToastProvider } from './components/Toast'
 import AdminDashboard from './pages/AdminDashboard'
 import EmployeeDashboard from './pages/EmployeeDashboard'
@@ -10,26 +8,12 @@ import LoginPage from './pages/LoginPage'
 export default function App() {
   const [session, setSession] = useState(() => readSession())
 
-  useEffect(() => {
-    function handleExpired() {
-      setSession(null)
-    }
-
-    window.addEventListener(SESSION_EXPIRED_EVENT, handleExpired)
-    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleExpired)
-  }, [])
-
   const handleLogin = useCallback((nextSession) => {
     writeSession(nextSession)
     setSession(nextSession)
   }, [])
 
-  const handleLogout = useCallback(async () => {
-    try {
-      await logout()
-    } catch {
-      // The local session is cleared either way.
-    }
+  const handleLogout = useCallback(() => {
     clearSession()
     setSession(null)
   }, [])

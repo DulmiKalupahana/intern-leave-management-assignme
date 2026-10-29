@@ -1,25 +1,17 @@
-import { apiRequest } from './client'
+import { addLeave, approveLeave as approve, listLeaves, rejectLeave as reject } from './store'
 
-export function getLeaves() {
-  return apiRequest('/api/leaves')
+export async function getLeaves() {
+  return listLeaves()
 }
 
-export function createLeave(data) {
-  return apiRequest('/api/leaves', {
-    method: 'POST',
-    body: data,
-  })
+export async function createLeave(data) {
+  return addLeave(data)
 }
 
-export function approveLeave(id) {
-  return apiRequest(`/api/leaves/${id}/approve`, {
-    method: 'PATCH',
-  })
+export async function approveLeave(id) {
+  return approve(id)
 }
 
-export function rejectLeave(id, rejectionReason) {
-  return apiRequest(`/api/leaves/${id}/reject`, {
-    method: 'PATCH',
-    body: { rejectionReason },
-  })
+export async function rejectLeave(id, rejectionReason) {
+  return reject(id, rejectionReason)
 }

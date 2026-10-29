@@ -91,6 +91,20 @@ export default function EmployeeDashboard({ session }) {
     }
   }, [])
 
+  useEffect(() => {
+    function refresh() {
+      loadLeaves()
+    }
+
+    window.addEventListener('storage', refresh)
+    window.addEventListener('focus', refresh)
+
+    return () => {
+      window.removeEventListener('storage', refresh)
+      window.removeEventListener('focus', refresh)
+    }
+  }, [loadLeaves])
+
   function handleCreated(created) {
     setFormOpen(false)
     notify(

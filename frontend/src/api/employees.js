@@ -1,12 +1,9 @@
-import { apiRequest } from './client'
+import { addEmployee, listEmployees } from './store'
 
-export function getEmployees() {
-  return apiRequest('/api/employees')
+export async function getEmployees() {
+  return listEmployees()
 }
 
-export function createEmployee(data) {
-  return apiRequest('/api/employees', {
-    method: 'POST',
-    body: data,
-  })
+export async function createEmployee(data) {
+  return addEmployee(data)
 }

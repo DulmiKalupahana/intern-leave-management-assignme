@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ApiError, getErrorMessage } from '../api/client'
 import { createEmployee, getEmployees } from '../api/employees'
+import { DEPARTMENTS } from '../api/store'
 import EmptyState from '../components/EmptyState'
 import Modal from '../components/Modal'
 import Spinner from '../components/Spinner'
@@ -160,18 +161,22 @@ function AddEmployeeForm({ onCreated, onCancel }) {
 
         <div className="form-field">
           <label htmlFor="employee-department">Department</label>
-          <input
+          <select
             id="employee-department"
             name="department"
-            type="text"
             value={form.department}
             onChange={handleChange}
-            placeholder="Engineering"
-            autoComplete="organization"
             required
             aria-invalid={Boolean(errors.department)}
             aria-describedby={errors.department ? 'employee-department-error' : undefined}
-          />
+          >
+            <option value="">Select a department</option>
+            {DEPARTMENTS.map((department) => (
+              <option key={department} value={department}>
+                {department}
+              </option>
+            ))}
+          </select>
           {errors.department ? (
             <p className="field-error" id="employee-department-error">
               {errors.department}
