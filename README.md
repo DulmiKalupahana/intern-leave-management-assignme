@@ -310,15 +310,37 @@ CORS is enabled for `http://localhost:5173` only (`backend/src/main/java/com/exa
 
 ## 9. Screenshots
 
-The five review screenshots live in [`docs/screenshots/`](docs/screenshots). The directory is committed (with a `.gitkeep`) so the README links resolve as soon as the images are added.
+The five review screenshots live in [`docs/screenshots/`](docs/screenshots) and are captured from the running application at 1440×900.
 
-| File | Screen |
-|---|---|
-| `01-employees.png` | Employees page with the add form and the directory table |
-| `02-submit-leave.png` | Leave request form with employee/type dropdowns and date pickers |
-| `03-admin-table.png` | Admin leave request table with status badges |
-| `04-validation-error.png` | Server-side validation error rendered on a field |
-| `05-approve-reject.png` | Approve/reject actions, including the rejection-reason modal |
+### Employees page
+
+Add form and directory table.
+
+![Employees page with the add form and the directory table](docs/screenshots/01-employees.png)
+
+### Submit leave
+
+Employee and leave-type dropdowns, date pickers and reason.
+
+![Leave request form with employee and type dropdowns and date pickers](docs/screenshots/02-submit-leave.png)
+
+### Admin leave requests
+
+All three status colours (amber pending, green approved, red rejected) and row actions.
+
+![Admin leave request table with status badges](docs/screenshots/03-admin-table.png)
+
+### Validation error
+
+The duplicate-email rule is enforced by the API and rendered on the field with a toast.
+
+![Server-side validation error rendered on a field](docs/screenshots/04-validation-error.png)
+
+### Approve / reject
+
+The rejection-reason modal, with the reason required before confirming.
+
+![Approve and reject actions, including the rejection-reason modal](docs/screenshots/05-approve-reject.png)
 
 ---
 
@@ -388,7 +410,6 @@ Being explicit about what is *not* done:
 - **Authentication is not implemented** (optional in the brief) — see the security notice above.
 - **Schema strategy:** `schema.sql` is the source of truth and Hibernate validates against it, rather than Hibernate generating the schema. The H2 test profile intentionally skips `schema.sql` and lets Hibernate create the in-memory schema from the entities.
 - **No delete/update endpoints** for employees or leave requests, because the brief only asked for create/list plus approve/reject.
-- **No screenshots are checked in yet** — `docs/screenshots/` is present with a `.gitkeep`; the images listed in section 9 still need to be added.
 - The frontend has no automated tests; backend coverage is 40 tests.
 
 ---
